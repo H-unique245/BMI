@@ -64,11 +64,13 @@ app.get("/profile/:email",async (req,res)=>{
 
 // calculateBMI
 app.post("/bmiCalculate",async(req,res)=>{
-    const { height, weight,userId } = req.query;
-    
-     let bmi=weight/height;
-     await User.findByIdAndUpdate(userId, {$push: {bmiCalculations: {bmi, height, weight}}});
-     if(bmi<18.5){
+    const { height, weight,userId } = req.body;
+    console.log(height,weight,userId);
+     let bmi=Number(weight)/Number(height);
+     bmi = Math.floor(bmi);
+     console.log("bmi:", bmi);
+     let result;
+    if(bmi<18.5){
         res.send({BMI:bmi,result:"Underweight"})
      }
     else if(bmi>=18.5 && bmi<=24.9){
@@ -82,8 +84,12 @@ app.post("/bmiCalculate",async(req,res)=>{
     }
     else if(bmi>=35 && bmi<=39.9){
         res.send({BMI:bmi,result:"Extreme Obesity"})
+    }else{
+        res.send({BMI:bmi,result:"Extreme Obesity"})
     }
-     //res.send({BMI:bmi})
+    let Updateuser= await UserModel.findByIdAndUpdate(userId, {$push: {bmiCalculations: {bmi, height, weight}}});
+    Updateuser.save(); 
+    //  res.send({BMI:bmi})
 })
 mongoose.connect(DB_URL).then(() => {
     app.listen(8080, () => {
